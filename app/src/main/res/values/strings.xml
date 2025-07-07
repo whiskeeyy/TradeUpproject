@@ -19,4 +19,11 @@
     <string name="profile">Profile</string>
     <string name="tradeup">TradeUp</string>
     <string name="search">Search...</string>
+    <string name="profile_image">Profile Image</string>
+    <string name="tap_image_to_change">Tap image to change</string>
+    <string name="edit_display_name">Display Name</string>
+    <string name="edit_contact_info">Contact Info</string>
+    <string name="edit_bio">Bio</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="delete_account">Delete Account</string>
 </resources>
