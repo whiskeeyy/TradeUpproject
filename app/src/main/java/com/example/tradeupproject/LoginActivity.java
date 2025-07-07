@@ -1,4 +1,93 @@
 package com.example.tradeupproject;
 
-public class LoginActivity {
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.widget.*;
+import androidx.appcompat.app.AppCompatActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+public class LoginActivity extends AppCompatActivity {
+
+    private EditText emailEditText, passwordEditText;
+    private Button loginButton;
+    private TextView forgotPasswordText;
+    private FirebaseAuth mAuth; // used in multiple methods, so keep as field
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        // Initialize Firebase Auth
+        mAuth = FirebaseAuth.getInstance();
+
+        // UI Elements
+        emailEditText = findViewById(R.id.emailEditText);
+        passwordEditText = findViewById(R.id.passwordEditText);
+        loginButton = findViewById(R.id.loginButton);
+        forgotPasswordText = findViewById(R.id.forgotPasswordText);
+
+        // Enable login only when both fields are filled
+        TextWatcher watcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
+                String email = emailEditText.getText().toString().trim();
+                String password = passwordEditText.getText().toString().trim();
+                loginButton.setEnabled(!email.isEmpty() && !password.isEmpty());
+            }
+        };
+        emailEditText.addTextChangedListener(watcher);
+        passwordEditText.addTextChangedListener(watcher);
+
+        // Click listeners
+        loginButton.setOnClickListener(v -> loginUser());
+        forgotPasswordText.setOnClickListener(v -> sendPasswordReset());
+    }
+
+    private void loginUser() {
+        String email = emailEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString().trim();
+
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null && user.isEmailVerified()) {
+                            Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(this, MainActivity.class));
+                            finish();
+                        } else {
+                            Toast.makeText(this, "Please verify your email before logging in.", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Exception e = task.getException();
+                        String message = (e != null) ? e.getMessage() : "Unknown error";
+                        Toast.makeText(this, "Login failed: " + message, Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    private void sendPasswordReset() {
+        String email = emailEditText.getText().toString().trim();
+
+        if (email.isEmpty()) {
+            Toast.makeText(this, "Enter your email to reset password.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        mAuth.sendPasswordResetEmail(email)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(this, "Reset link sent to your email.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Exception e = task.getException();
+                        String message = (e != null) ? e.getMessage() : "Failed to send reset link.";
+                        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 }
