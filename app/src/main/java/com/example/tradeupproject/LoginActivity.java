@@ -21,74 +21,72 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // 1️⃣ Init FirebaseAuth
         mAuth = FirebaseAuth.getInstance();
 
-        emailEditText = findViewById(R.id.emailEditText);
-        passwordEditText = findViewById(R.id.passwordEditText);
-        loginButton = findViewById(R.id.loginButton);
-        forgotPasswordText = findViewById(R.id.forgotPasswordText);
+        // 2️⃣ Find Views
+        emailEditText       = findViewById(R.id.emailEditText);
+        passwordEditText    = findViewById(R.id.passwordEditText);
+        loginButton         = findViewById(R.id.loginButton);
+        forgotPasswordText  = findViewById(R.id.forgotPasswordText);
         createAccountButton = findViewById(R.id.createAccountButton);
 
+        // 3️⃣ Enable login button only when both fields are non-empty
         TextWatcher watcher = new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
+            @Override public void onTextChanged(CharSequence s, int st, int b, int c) {}
             @Override public void afterTextChanged(Editable s) {
                 String email = emailEditText.getText().toString().trim();
-                String password = passwordEditText.getText().toString().trim();
-                loginButton.setEnabled(!email.isEmpty() && !password.isEmpty());
+                String pwd   = passwordEditText.getText().toString().trim();
+                loginButton.setEnabled(!email.isEmpty() && !pwd.isEmpty());
             }
         };
-
         emailEditText.addTextChangedListener(watcher);
         passwordEditText.addTextChangedListener(watcher);
 
+        // 4️⃣ Click listeners
         loginButton.setOnClickListener(v -> loginUser());
         forgotPasswordText.setOnClickListener(v -> sendPasswordReset());
-
-        // Register button action
         createAccountButton.setOnClickListener(v -> {
-            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
         });
     }
 
     private void loginUser() {
         String email = emailEditText.getText().toString().trim();
-        String password = passwordEditText.getText().toString().trim();
+        String pwd   = passwordEditText.getText().toString().trim();
 
-        mAuth.signInWithEmailAndPassword(email, password)
+        mAuth.signInWithEmailAndPassword(email, pwd)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null && user.isEmailVerified()) {
-                            Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(this, HomeActivity.class));
-                            finish();
-                        } else {
-                            Toast.makeText(this, "Login failed", Toast.LENGTH_LONG).show();
-                        }
+                        // Bỏ hẳn phần kiểm tra emailVerified
+                        Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                        finish();
                     } else {
-                        String message = task.getException() != null ? task.getException().getMessage() : "Login failed";
-                        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+                        String err = task.getException() != null
+                                ? task.getException().getMessage()
+                                : "Authentication failed";
+                        Toast.makeText(this, err, Toast.LENGTH_LONG).show();
                     }
                 });
     }
 
     private void sendPasswordReset() {
         String email = emailEditText.getText().toString().trim();
-
         if (email.isEmpty()) {
             Toast.makeText(this, "Enter your email to reset password.", Toast.LENGTH_SHORT).show();
             return;
         }
-
         mAuth.sendPasswordResetEmail(email)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         Toast.makeText(this, "Reset link sent to your email.", Toast.LENGTH_SHORT).show();
                     } else {
-                        String message = task.getException() != null ? task.getException().getMessage() : "Failed to send reset link.";
-                        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                        String err = task.getException() != null
+                                ? task.getException().getMessage()
+                                : "Reset failed";
+                        Toast.makeText(this, err, Toast.LENGTH_LONG).show();
                     }
                 });
     }
