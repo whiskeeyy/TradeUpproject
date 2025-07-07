@@ -12,4 +12,11 @@
     <string name="password_min_6_chars">Password (min. 6 chars)</string>
     <string name="register">Create New Account</string>
     <string name="back_to_login"><![CDATA[<\n]]></string>
+    <string name="home">Home</string>
+    <string name="my_listings">My Listings</string>
+    <string name="post">Post</string>
+    <string name="notification">Notification</string>
+    <string name="profile">Profile</string>
+    <string name="tradeup">TradeUp</string>
+    <string name="search">Search...</string>
 </resources>

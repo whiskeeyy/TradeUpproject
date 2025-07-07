@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="BottomNavTextStyle" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:textSize">17sp</item>
+        <item name="android:paddingTop">4dp</item> <!-- Thêm nếu muốn kéo lên -->
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+</resources>
