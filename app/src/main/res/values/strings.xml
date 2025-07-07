@@ -5,4 +5,11 @@
     <string name="button_login">Login</string>
     <string name="text_forgot_password">Forgot your password?</string>
     <string name="login_Logo">Login Logo</string>
+    <string name="button_register">Create new account</string>
+    <string name="display_name">Display Name</string>
+    <string name="contact_number">Contact Number</string>
+    <string name="email">Email</string>
+    <string name="password_min_6_chars">Password (min. 6 chars)</string>
+    <string name="register">Create New Account</string>
+    <string name="back_to_login"><![CDATA[<\n]]></string>
 </resources>
