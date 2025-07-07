@@ -30,7 +30,6 @@
             android:layout_height="40dp"
             android:layout_weight="1"
             android:hint="@string/search"
-            android:background="@drawable/search_bar_bg"
             android:padding="10dp"
             android:textColorHint="#888888"
             android:textColor="#000000"
