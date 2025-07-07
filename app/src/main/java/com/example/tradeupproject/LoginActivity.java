@@ -62,10 +62,10 @@ public class LoginActivity extends AppCompatActivity {
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null && user.isEmailVerified()) {
                             Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(this, MainActivity.class));
+                            startActivity(new Intent(this, HomeActivity.class));
                             finish();
                         } else {
-                            Toast.makeText(this, "Please verify your email before logging in.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, "Login failed", Toast.LENGTH_LONG).show();
                         }
                     } else {
                         String message = task.getException() != null ? task.getException().getMessage() : "Login failed";
