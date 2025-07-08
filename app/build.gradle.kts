@@ -45,6 +45,7 @@ dependencies {
 
     // Google Sign-In (outside Firebase BoM — needs version!)
     implementation("com.google.android.gms:play-services-auth:21.1.0") // ✅ ADD version here!
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
 
     // Other libraries
     implementation(libs.appcompat)

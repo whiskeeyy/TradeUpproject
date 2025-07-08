@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Title -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/title">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Description -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/description">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:minLines="3" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Price -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/price">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Category Spinner -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/category" />
+        <Spinner
+            android:id="@+id/spinnerCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Condition Spinner -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/condition" />
+        <Spinner
+            android:id="@+id/spinnerCondition"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Location + GPS -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/etLocation"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:hint="@string/location"
+                android:inputType="textPostalAddress" />
+
+            <ImageButton
+                android:id="@+id/btnGps"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:contentDescription="@string/gps"
+                android:src="@android:drawable/ic_menu_mylocation" />
+        </LinearLayout>
+
+        <!-- Behavior (optional) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/behavior_optional">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etBehavior"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Additional Tags (optional) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/additional_tags_optional">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTags"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:hint="@string/comma_separated" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Photo selector -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/photos_at_least_1_up_to_10" />
+
+        <LinearLayout
+            android:id="@+id/photosContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="4dp">
+
+            <!-- thumbnails sẽ được thêm vào đây -->
+            <ImageButton
+                android:id="@+id/btnAddPhoto"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:contentDescription="@string/add_photo"
+                android:src="@android:drawable/ic_input_add" />
+        </LinearLayout>
+
+        <!-- Preview & Submit -->
+        <Button
+            android:id="@+id/btnPreview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/preview" />
+
+        <Button
+            android:id="@+id/btnSubmit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:enabled="false"
+            android:text="@string/submit" />
+
+    </LinearLayout>
+</ScrollView>
