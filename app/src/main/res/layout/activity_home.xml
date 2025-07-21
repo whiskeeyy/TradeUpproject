@@ -9,41 +9,52 @@
     <LinearLayout
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="133dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="12dp"
-        android:gravity="center_vertical">
+        android:padding="12dp">
 
         <TextView
             android:id="@+id/appTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
             android:text="@string/tradeup"
-            android:textSize="26sp"
-            android:textStyle="bold"
             android:textColor="#FB6767"
-            android:layout_marginEnd="12dp" />
+            android:textSize="26sp"
+            android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/searchBar"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:hint="@string/search"
-            android:padding="10dp"
-            android:textColorHint="#888888"
-            android:textColor="#000000"
-            android:drawableStart="@android:drawable/ic_menu_search"
-            android:drawablePadding="8dp"
-            android:inputType="text" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:hint="@string/search_items"
+            app:endIconMode="custom">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/searchBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
+
+    <!-- Category filter -->
+    <Spinner
+        android:id="@+id/spinnerFilterCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/headerLayout"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp" />
 
     <!-- 🔽 Product List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/productRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/headerLayout"
+        android:layout_below="@id/spinnerFilterCategory"
         android:layout_above="@id/bottomNavigation"
         android:padding="12dp"
         android:clipToPadding="false"
@@ -61,4 +72,5 @@
         app:itemTextAppearanceInactive="@style/BottomNavTextStyle"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu" />
+
 </RelativeLayout>
