@@ -40,6 +40,8 @@
         <activity android:name=".AddItemActivity" />
         <activity android:name=".ListingDetailActivity" />
         <activity android:name=".PreviewActivity" />
+        <activity android:name=".MyListingsActivity" />
+        <activity android:name=".NotificationActivity" />
 
 
 

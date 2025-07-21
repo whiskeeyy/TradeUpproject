@@ -56,4 +56,8 @@
     <string name="delete_listing">Delete</string>
     <string name="preview_edit">Edit</string>
     <string name="preview_submit">Submit</string>
+    <string name="notifications">Notifications</string>
+    <string name="my_listings_title">My Listings</string>
+    <string name="update_status">Update Status</string>
+    <string name="search_items">Search items…</string>
 </resources>
