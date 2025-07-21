@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Carousel ảnh -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPagerImages"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvDetailTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/listing_title"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Price -->
+        <TextView
+            android:id="@+id/tvDetailPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/listing_value"
+            android:textSize="18sp"
+            android:textColor="#E91E63"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Category & Condition -->
+        <TextView
+            android:id="@+id/tvDetailCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/category_condition"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Location -->
+        <TextView
+            android:id="@+id/tvDetailLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/listing_location"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Description -->
+        <TextView
+            android:id="@+id/tvDetailDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/listing_description"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Behavior, Tags -->
+        <TextView
+            android:id="@+id/tvDetailBehavior"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/listing_behavior"
+            android:textSize="14sp"
+            android:layout_marginBottom="4dp"/>
+        <TextView
+            android:id="@+id/tvDetailTags"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/listing_tags"
+            android:textSize="14sp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Buttons -->
+        <Button
+            android:id="@+id/btnContactSeller"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/contact_seller"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:id="@+id/btnEditListing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/edit_listing"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/btnDeleteListing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/delete_listing"
+            android:visibility="visible" />
+
+
+    </LinearLayout>
+</ScrollView>

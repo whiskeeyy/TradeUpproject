@@ -44,4 +44,16 @@
     <string name="Listing_title">Title</string>
     <string name="Product_value">₫0</string>
     <string name="item_location">Location</string>
+    <string name="listing_title">Title</string>
+    <string name="listing_value">₫0</string>
+    <string name="category_condition">Category • Condition</string>
+    <string name="listing_location">Location</string>
+    <string name="listing_description">Description</string>
+    <string name="listing_behavior">Behavior</string>
+    <string name="listing_tags">Tags</string>
+    <string name="contact_seller">Contact Seller</string>
+    <string name="edit_listing">Edit Listing</string>
+    <string name="delete_listing">Delete</string>
+    <string name="preview_edit">Edit</string>
+    <string name="preview_submit">Submit</string>
 </resources>

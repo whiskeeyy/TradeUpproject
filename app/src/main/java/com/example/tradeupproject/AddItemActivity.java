@@ -1,213 +1,214 @@
 package com.example.tradeupproject;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.View;
 import android.widget.*;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-
-import java.io.IOException;
+import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 public class AddItemActivity extends AppCompatActivity {
-    private static final int REQ_CODE_LOCATION = 1001;
+    private static final int REQUEST_LOCATION_PERMISSION = 100;
+    private static final int PICK_IMAGE_REQUEST = 101;
 
-    private EditText etTitle, etDescription, etPrice, etLocation, etBehavior, etTags;
+    private TextInputEditText etTitle, etDescription, etPrice, etBehavior, etTags;
+    private EditText etLocation;
     private Spinner spinnerCategory, spinnerCondition;
+    private ImageButton btnGps, btnAddPhoto;
     private LinearLayout photosContainer;
-    private ImageButton btnAddPhoto, btnGps;
-    private Button btnPreview, btnSubmit;
+    private Button btnPreview;
 
+    private final List<String> selectedImages = new ArrayList<>();
     private FusedLocationProviderClient fusedLocationClient;
-    private List<Uri> photoUris = new ArrayList<>();
-    private ActivityResultLauncher<Intent> pickPhotosLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_item);
 
-        // 1️⃣ Ánh xạ view
-        etTitle         = findViewById(R.id.etTitle);
-        etDescription   = findViewById(R.id.etDescription);
-        etPrice         = findViewById(R.id.etPrice);
-        spinnerCategory = findViewById(R.id.spinnerCategory);
-        spinnerCondition= findViewById(R.id.spinnerCondition);
-        etLocation      = findViewById(R.id.etLocation);
-        btnGps          = findViewById(R.id.btnGps);
-        etBehavior      = findViewById(R.id.etBehavior);
-        etTags          = findViewById(R.id.etTags);
+        // Ánh xạ View
+        etTitle       = findViewById(R.id.etTitle);
+        etDescription = findViewById(R.id.etDescription);
+        etPrice       = findViewById(R.id.etPrice);
+        etLocation    = findViewById(R.id.etLocation);
+        etBehavior    = findViewById(R.id.etBehavior);
+        etTags        = findViewById(R.id.etTags);
+
+        spinnerCategory  = findViewById(R.id.spinnerCategory);
+        spinnerCondition = findViewById(R.id.spinnerCondition);
+
+        btnGps         = findViewById(R.id.btnGps);
+        btnAddPhoto    = findViewById(R.id.btnAddPhoto);
         photosContainer = findViewById(R.id.photosContainer);
-        btnAddPhoto     = findViewById(R.id.btnAddPhoto);
-        btnPreview      = findViewById(R.id.btnPreview);
-        btnSubmit       = findViewById(R.id.btnSubmit);
 
-        // 2️⃣ Thiết lập Location client
+        btnPreview = findViewById(R.id.btnPreview);
+
+        // Khởi tạo FusedLocationProvider
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        btnGps.setOnClickListener(v -> {
-            // Nếu chưa có quyền thì request, còn có thì fetch ngay
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                            != PackageManager.PERMISSION_GRANTED) {
 
-                ActivityCompat.requestPermissions(
-                        this,
-                        new String[]{
-                                Manifest.permission.ACCESS_COARSE_LOCATION,
-                                Manifest.permission.ACCESS_FINE_LOCATION
-                        },
-                        REQ_CODE_LOCATION
-                );
-            } else {
-                fetchAndFillLocation();
-            }
-        });
+        // Thiết lập Spinner
+        setupSpinners();
 
-        // 3️⃣ Spinner mẫu
-        spinnerCategory.setAdapter(new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                new String[]{ "Cars", "Electronics", "Furniture" }
-        ));
-        spinnerCondition.setAdapter(new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                new String[]{ "New", "Used - Like New", "Used - Fair" }
-        ));
+        // TextWatcher để validate
+        TextWatcher watcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
+            @Override public void onTextChanged(CharSequence s, int st, int b, int c) {}
+            @Override public void afterTextChanged(Editable s) { validateFields(); }
+        };
+        etTitle.addTextChangedListener(watcher);
+        etDescription.addTextChangedListener(watcher);
+        etPrice.addTextChangedListener(watcher);
+        etLocation.addTextChangedListener(watcher);
 
-        // 4️⃣ Chọn ảnh từ Gallery
-        pickPhotosLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        Uri imageUri = result.getData().getData();
-                        if (imageUri != null && photoUris.size() < 10) {
-                            photoUris.add(imageUri);
-                            ImageView thumb = new ImageView(this);
-                            thumb.setImageURI(imageUri);
-                            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(150, 150);
-                            lp.setMargins(8, 8, 8, 8);
-                            thumb.setLayoutParams(lp);
-                            photosContainer.addView(thumb);
-                            updateSubmitState();
-                        }
-                    }
-                }
-        );
-        btnAddPhoto.setOnClickListener(v -> {
-            Intent pick = new Intent(
-                    Intent.ACTION_PICK,
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            );
-            pick.setType("image/*");
-            pickPhotosLauncher.launch(pick);
-        });
+        // GPS autofill
+        btnGps.setOnClickListener(v -> requestLocation());
 
-        // 5️⃣ Preview & Submit
-        btnPreview.setOnClickListener(v -> previewListing());
-        btnSubmit.setOnClickListener(v -> submitListing());
-        updateSubmitState();
+        // Chọn ảnh
+        btnAddPhoto.setOnClickListener(v -> pickImages());
+
+        // Preview
+        btnPreview.setEnabled(false);
+        btnPreview.setOnClickListener(v -> goToPreview());
     }
 
-    // Callback sau khi người dùng phản hồi permission dialog
+    private void setupSpinners() {
+        ArrayAdapter<String> catAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_item,
+                Arrays.asList("Electronics","Furniture","Clothing","Books","Other")
+        );
+        catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategory.setAdapter(catAdapter);
+
+        ArrayAdapter<String> condAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_item,
+                Arrays.asList("New","Used","Refurbished")
+        );
+        condAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCondition.setAdapter(condAdapter);
+
+        AdapterView.OnItemSelectedListener sel = new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
+                validateFields();
+            }
+            @Override public void onNothingSelected(AdapterView<?> p) {}
+        };
+        spinnerCategory.setOnItemSelectedListener(sel);
+        spinnerCondition.setOnItemSelectedListener(sel);
+    }
+
+    private void requestLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_LOCATION_PERMISSION
+            );
+        } else {
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(loc -> {
+                        if (loc != null) {
+                            etLocation.setText(loc.getLatitude() + "," + loc.getLongitude());
+                        } else {
+                            Toast.makeText(this, "Không lấy được vị trí", Toast.LENGTH_SHORT).show();
+                        }
+                        validateFields();
+                    });
+        }
+    }
+
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String[] permissions,
-                                           int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQ_CODE_LOCATION) {
-            boolean granted = grantResults.length >= 2
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                    && grantResults[1] == PackageManager.PERMISSION_GRANTED;
-            if (granted) {
-                fetchAndFillLocation();
-            } else {
-                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] perms, @NonNull int[] res) {
+        super.onRequestPermissionsResult(requestCode, perms, res);
+        if (requestCode == REQUEST_LOCATION_PERMISSION
+                && res.length > 0
+                && res[0] == PackageManager.PERMISSION_GRANTED) {
+            requestLocation();
+        } else {
+            Toast.makeText(this, "Quyền vị trí bị từ chối", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void pickImages() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST
+                && resultCode == RESULT_OK
+                && data != null) {
+            if (data.getClipData() != null) {
+                ClipData clip = data.getClipData();
+                for (int i = 0;
+                     i < clip.getItemCount() && selectedImages.size() < 10;
+                     i++) {
+                    Uri uri = clip.getItemAt(i).getUri();
+                    addImage(uri);
+                }
+            } else if (data.getData() != null
+                    && selectedImages.size() < 10) {
+                addImage(data.getData());
             }
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private void fetchAndFillLocation() {
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, location -> {
-                    if (location != null) {
-                        // Lấy lat/lng
-                        double lat = location.getLatitude();
-                        double lng = location.getLongitude();
-                        // Chuyển thành địa chỉ với Geocoder
-                        String address = geocode(lat, lng);
-                        etLocation.setText(address != null
-                                ? address
-                                : lat + ", " + lng);
-                    } else {
-                        Toast.makeText(this,
-                                "Unable to get location",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this,
-                                "Error fetching location: " + e.getMessage(),
-                                Toast.LENGTH_LONG).show()
-                );
+    private void addImage(Uri uri) {
+        selectedImages.add(uri.toString());
+        ImageView thumb = new ImageView(this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(200, 200);
+        lp.setMargins(8, 8, 8, 8);
+        thumb.setLayoutParams(lp);
+        thumb.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        thumb.setImageURI(uri);
+        photosContainer.addView(thumb);
+        validateFields();
     }
 
-    // Chuyển lat/lng thành địa chỉ (nếu có) hoặc trả về null
-    private String geocode(double lat, double lng) {
-        try {
-            Geocoder geo = new Geocoder(this, Locale.getDefault());
-            List<Address> list = geo.getFromLocation(lat, lng, 1);
-            if (list != null && !list.isEmpty()) {
-                Address a = list.get(0);
-                return a.getThoroughfare() + ", " + a.getLocality();
-            }
-        } catch (IOException ignored) {}
-        return null;
+    private void validateFields() {
+        boolean valid =
+                !TextUtils.isEmpty(etTitle.getText()) &&
+                        !TextUtils.isEmpty(etDescription.getText()) &&
+                        !TextUtils.isEmpty(etPrice.getText()) &&
+                        !TextUtils.isEmpty(etLocation.getText()) &&
+                        selectedImages.size() >= 1;
+        btnPreview.setEnabled(valid);
     }
 
-    private void updateSubmitState() {
-        boolean ok = !etTitle.getText().toString().trim().isEmpty()
-                && !etPrice.getText().toString().trim().isEmpty()
-                && photoUris.size() >= 1;
-        btnSubmit.setEnabled(ok);
-    }
-
-    private void previewListing() {
-        Intent i = new Intent(this, PreviewActivity.class);
-        i.putExtra("title", etTitle.getText().toString());
-        i.putExtra("desc",  etDescription.getText().toString());
-        i.putExtra("price", etPrice.getText().toString());
-        i.putExtra("category", spinnerCategory.getSelectedItem().toString());
-        i.putExtra("condition", spinnerCondition.getSelectedItem().toString());
-        i.putExtra("location", etLocation.getText().toString());
-        i.putExtra("behavior", etBehavior.getText().toString());
-        i.putExtra("tags", etTags.getText().toString());
-        i.putParcelableArrayListExtra("photos", new ArrayList<>(photoUris));
-        startActivity(i);
-    }
-
-    private void submitListing() {
-        // TODO: upload ảnh lên Firebase Storage và lưu metadata lên Firestore
-        Toast.makeText(this,
-                "Implement submit logic here",
-                Toast.LENGTH_SHORT).show();
+    private void goToPreview() {
+        Intent intent = new Intent(this, PreviewActivity.class);
+        intent.putExtra("title", etTitle.getText().toString().trim());
+        intent.putExtra("price", Long.parseLong(etPrice.getText().toString().trim()));
+        intent.putExtra("category", spinnerCategory.getSelectedItem().toString());
+        intent.putExtra("condition", spinnerCondition.getSelectedItem().toString());
+        intent.putExtra("description", etDescription.getText().toString().trim());
+        intent.putExtra("location", etLocation.getText().toString().trim());
+        intent.putExtra("status", etBehavior.getText().toString().trim());
+        intent.putStringArrayListExtra(
+                "tags",
+                new ArrayList<>(Arrays.asList(etTags.getText().toString().split("\\s*,\\s*")))
+        );
+        intent.putStringArrayListExtra("images", new ArrayList<>(selectedImages));
+        startActivity(intent);
     }
 }
