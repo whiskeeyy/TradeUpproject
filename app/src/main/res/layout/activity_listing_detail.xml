@@ -78,8 +78,30 @@
             android:text="@string/listing_tags"
             android:textSize="14sp"
             android:layout_marginBottom="16dp"/>
-
+        <!-- Views count -->
+        <TextView
+            android:id="@+id/tvDetailViews"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Views: 0"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp"/>
         <!-- Buttons -->
+        <Spinner
+            android:id="@+id/spinnerStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:id="@+id/btnUpdateStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/update_status"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp"/>
+
         <Button
             android:id="@+id/btnContactSeller"
             android:layout_width="match_parent"

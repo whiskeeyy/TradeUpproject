@@ -4,28 +4,34 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;        // <-- Import này cho @NonNull
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.tradeupproject.adapters.ImagePagerAdapter;
 import com.example.tradeupproject.models.Listing;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ListingDetailActivity extends AppCompatActivity {
 
     private ViewPager2 viewPager;
     private TextView tvTitle, tvPrice, tvCategory, tvLocation,
-            tvDescription, tvBehavior, tvTags;
-    private Button btnContact, btnEdit, btnDelete;
+            tvDescription, tvBehavior, tvTags, tvViews;
+    private Spinner spinnerStatus;
+    private Button btnUpdateStatus, btnContact, btnEdit, btnDelete;
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
@@ -33,71 +39,67 @@ public class ListingDetailActivity extends AppCompatActivity {
     private Listing currentListing;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listing_detail);
 
-        // 1️⃣ Init Firestore + Auth
-        db = FirebaseFirestore.getInstance();
+        db   = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
 
-        // 2️⃣ Lấy listingId từ Intent
         listingId = getIntent().getStringExtra("listingId");
         if (listingId == null) {
-            Toast.makeText(this, "Không có listingId", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No listingId", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // 3️⃣ Ánh xạ view
-        viewPager    = findViewById(R.id.viewPagerImages);
-        tvTitle      = findViewById(R.id.tvDetailTitle);
-        tvPrice      = findViewById(R.id.tvDetailPrice);
-        tvCategory   = findViewById(R.id.tvDetailCategory);
-        tvLocation   = findViewById(R.id.tvDetailLocation);
-        tvDescription= findViewById(R.id.tvDetailDescription);
-        tvBehavior   = findViewById(R.id.tvDetailBehavior);
-        tvTags       = findViewById(R.id.tvDetailTags);
+        // Ánh xạ View
+        viewPager       = findViewById(R.id.viewPagerImages);
+        tvTitle         = findViewById(R.id.tvDetailTitle);
+        tvPrice         = findViewById(R.id.tvDetailPrice);
+        tvCategory      = findViewById(R.id.tvDetailCategory);
+        tvLocation      = findViewById(R.id.tvDetailLocation);
+        tvDescription   = findViewById(R.id.tvDetailDescription);
+        tvBehavior      = findViewById(R.id.tvDetailBehavior);
+        tvTags          = findViewById(R.id.tvDetailTags);
+        tvViews         = findViewById(R.id.tvDetailViews);
+        spinnerStatus   = findViewById(R.id.spinnerStatus);
+        btnUpdateStatus = findViewById(R.id.btnUpdateStatus);
+        btnContact      = findViewById(R.id.btnContactSeller);
+        btnEdit         = findViewById(R.id.btnEditListing);
+        btnDelete       = findViewById(R.id.btnDeleteListing);
 
-        btnContact = findViewById(R.id.btnContactSeller);
-        btnEdit    = findViewById(R.id.btnEditListing);
-        btnDelete  = findViewById(R.id.btnDeleteListing);
-
-        // 4️⃣ Ẩn trước nút Edit/Delete, chỉ show khi xác định owner
+        // Ẩn ban đầu
         btnEdit.setVisibility(View.GONE);
         btnDelete.setVisibility(View.GONE);
+        spinnerStatus.setVisibility(View.GONE);
+        btnUpdateStatus.setVisibility(View.GONE);
 
-        // 5️⃣ Xử lý click
-        btnContact.setOnClickListener(v -> {
-            // ví dụ: mở chat, gọi điện, hoặc gửi email...
-            Toast.makeText(this,
-                    "Contact seller: " + currentListing.getSellerId(),
-                    Toast.LENGTH_SHORT).show();
-        });
-
+        // Click listeners
+        btnContact.setOnClickListener(v ->
+                Toast.makeText(this,
+                        "Contact seller: " + currentListing.getSellerId(),
+                        Toast.LENGTH_SHORT).show()
+        );
         btnEdit.setOnClickListener(v -> {
-            Intent intent = new Intent(this, EditListingActivity.class);
-            intent.putExtra("listingId", listingId);
-            startActivity(intent);
+            Intent i = new Intent(this, EditListingActivity.class);
+            i.putExtra("listingId", listingId);
+            startActivity(i);
         });
+        btnDelete.setOnClickListener(v ->
+                db.collection("listings").document(listingId)
+                        .delete()
+                        .addOnSuccessListener(a -> {
+                            Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show();
+                            finish();
+                        })
+                        .addOnFailureListener(e ->
+                                Toast.makeText(this,
+                                        "Delete failed: " + e.getMessage(),
+                                        Toast.LENGTH_LONG).show()
+                        )
+        );
 
-        btnDelete.setOnClickListener(v -> {
-            db.collection("listings")
-                    .document(listingId)
-                    .delete()
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(this,
-                                "Xóa thành công", Toast.LENGTH_SHORT).show();
-                        finish();
-                    })
-                    .addOnFailureListener(e ->
-                            Toast.makeText(this,
-                                    "Xóa thất bại: " + e.getMessage(),
-                                    Toast.LENGTH_LONG).show()
-                    );
-        });
-
-        // 6️⃣ Load dữ liệu từ Firestore
         loadListingDetail();
     }
 
@@ -106,58 +108,81 @@ public class ListingDetailActivity extends AppCompatActivity {
                 .document(listingId)
                 .get()
                 .addOnSuccessListener(doc -> {
-                    if (!doc.exists()) {
-                        Toast.makeText(this,
-                                "Listing không tồn tại", Toast.LENGTH_SHORT).show();
-                        finish();
-                        return;
-                    }
-
+                    if (!doc.exists()) { finish(); return; }
                     currentListing = doc.toObject(Listing.class);
-                    if (currentListing == null) {
-                        Toast.makeText(this,
-                                "Lỗi dữ liệu", Toast.LENGTH_SHORT).show();
-                        finish();
-                        return;
-                    }
+                    if (currentListing == null) { finish(); return; }
 
-                    // 7️⃣ Đổ dữ liệu lên UI
+                    // Fill dữ liệu
                     tvTitle.setText(currentListing.getTitle());
                     tvPrice.setText("₫" + currentListing.getPrice());
                     tvCategory.setText(
-                            currentListing.getCategory()
-                                    + " • "
-                                    + currentListing.getCondition()
+                            currentListing.getCategory() + " • " + currentListing.getCondition()
                     );
                     tvLocation.setText(currentListing.getLocation());
                     tvDescription.setText(currentListing.getDescription());
-                    tvBehavior.setText(currentListing.getStatus());  // nếu bạn đổi field behavior→status
+                    tvBehavior.setText(currentListing.getStatus());
+                    tvTags.setText(TextUtils.join(", ", currentListing.getTags()));
 
-                    // nối list tags thành chuỗi
-                    List<String> tags = currentListing.getTags();
-                    if (tags != null && !tags.isEmpty()) {
-                        tvTags.setText(TextUtils.join(", ", tags));
-                    }
-
-                    // 8️⃣ Carousel ảnh
-                    List<String> imgs = currentListing.getImages();
-                    if (imgs == null) imgs = new ArrayList<>();
-                    ImagePagerAdapter adapter =
-                            new ImagePagerAdapter(this, imgs);
-                    viewPager.setAdapter(adapter);
-
-                    // 9️⃣ Hiện Edit/Delete nếu đúng owner
+                    // Views
+                    int oldViews = currentListing.getViews();
+                    tvViews.setText("Views: " + oldViews);
                     String uid = auth.getCurrentUser() != null
                             ? auth.getCurrentUser().getUid()
                             : "";
-                    if (uid.equals(currentListing.getSellerId())) {
+                    boolean isOwner = uid.equals(currentListing.getSellerId());
+                    if (!isOwner) {
+                        db.collection("listings")
+                                .document(listingId)
+                                .update("views", FieldValue.increment(1))
+                                .addOnSuccessListener(a ->
+                                        tvViews.setText("Views: " + (oldViews + 1))
+                                );
+                    }
+
+                    // Carousel ảnh
+                    List<String> imgs = currentListing.getImages();
+                    if (imgs == null) imgs = Arrays.asList();
+                    viewPager.setAdapter(new ImagePagerAdapter(this, imgs));
+
+                    // Owner controls
+                    if (isOwner) {
                         btnEdit.setVisibility(View.VISIBLE);
                         btnDelete.setVisibility(View.VISIBLE);
+                        spinnerStatus.setVisibility(View.VISIBLE);
+                        btnUpdateStatus.setVisibility(View.VISIBLE);
+
+                        List<String> statuses = Arrays.asList("Available","Sold","Paused");
+                        ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(
+                                this, android.R.layout.simple_spinner_item, statuses
+                        );
+                        statusAdapter.setDropDownViewResource(
+                                android.R.layout.simple_spinner_dropdown_item
+                        );
+                        spinnerStatus.setAdapter(statusAdapter);
+                        int idx = statuses.indexOf(currentListing.getStatus());
+                        if (idx >= 0) spinnerStatus.setSelection(idx);
+
+                        btnUpdateStatus.setOnClickListener(v -> {
+                            String newStatus = spinnerStatus.getSelectedItem().toString();
+                            db.collection("listings")
+                                    .document(listingId)
+                                    .update("status", newStatus)
+                                    .addOnSuccessListener(a ->
+                                            Toast.makeText(this,
+                                                    "Status updated to “" + newStatus + "”",
+                                                    Toast.LENGTH_SHORT).show()
+                                    )
+                                    .addOnFailureListener(e ->
+                                            Toast.makeText(this,
+                                                    "Update failed: " + e.getMessage(),
+                                                    Toast.LENGTH_LONG).show()
+                                    );
+                        });
                     }
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this,
-                                "Load thất bại: " + e.getMessage(),
+                                "Load failed: " + e.getMessage(),
                                 Toast.LENGTH_LONG).show()
                 );
     }
