@@ -26,4 +26,22 @@
     <string name="edit_bio">Bio</string>
     <string name="save_changes">Save Changes</string>
     <string name="delete_account">Delete Account</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="price">Price</string>
+    <string name="category">Category</string>
+    <string name="condition">Condition</string>
+    <string name="location">Location</string>
+    <string name="gps">GPS</string>
+    <string name="behavior_optional">Behavior</string>
+    <string name="additional_tags_optional">Additional Tags</string>
+    <string name="photos_at_least_1_up_to_10">Photos (at least 1, up to 10)</string>
+    <string name="add_photo">Add Photo</string>
+    <string name="preview">Preview</string>
+    <string name="submit">Submit</string>
+    <string name="comma_separated">comma-separated</string>
+    <string name="listing_image">Listing Image</string>
+    <string name="Listing_title">Title</string>
+    <string name="Product_value">₫0</string>
+    <string name="item_location">Location</string>
 </resources>
