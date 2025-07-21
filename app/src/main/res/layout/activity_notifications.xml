@@ -1,28 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layoutNotifications"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
     android:padding="16dp">
 
-    <!-- Tiêu đề -->
+    <!-- Header Title -->
     <TextView
         android:id="@+id/tvNotificationsTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/notifications"
+        android:text="Notifications"
         android:textSize="26sp"
         android:textStyle="bold"
         android:textColor="#FB6767"/>
 
-    <!-- RecyclerView hiển thị thông báo -->
+    <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerNotifications"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/tvNotificationsTitle"
-        android:layout_marginTop="8dp"
-        android:paddingBottom="16dp"/>
+        android:layout_above="@id/bottomNavigation"
+        android:paddingTop="8dp"
+        android:clipToPadding="false"
+        android:scrollbars="vertical" />
+
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="-1dp"
+        app:itemIconSize="24dp"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav_menu" />
 
 </RelativeLayout>
