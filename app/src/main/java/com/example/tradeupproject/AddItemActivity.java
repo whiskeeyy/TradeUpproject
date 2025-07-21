@@ -89,7 +89,7 @@ public class AddItemActivity extends AppCompatActivity {
     private void setupSpinners() {
         ArrayAdapter<String> catAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_item,
-                Arrays.asList("Electronics","Furniture","Clothing","Books","Other")
+                Arrays.asList("Electronics","Furniture","Clothing","Books","Cars","Other")
         );
         catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCategory.setAdapter(catAdapter);
